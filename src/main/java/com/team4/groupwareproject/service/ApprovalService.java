@@ -35,13 +35,12 @@ public class ApprovalService {
     public Approval addApproval(Long userNo, Approval approval, List<MultipartFile> files) throws IOException {
         User user = uRepo.findByUserNo(userNo);
         Apprform af = afRepo.findByAfNo(approval.getAfNo());
-        Approver ap = apRepo.findByApNo(approval.getApNo());
 
         Approval newAvl = Approval.builder()
                 .afNo(approval.getAfNo())
                 .afNm(af.getAfNm())
-                .apNo(approval.getApNo())
-                .apNm(ap.getUserNm())
+                .apNo(af.getApNo())
+                .apNm(af.getApNm())
                 .userNo(userNo)
                 .userNm(user.getUserNm())
                 .avlTit(approval.getAvlTit())
@@ -70,5 +69,19 @@ public class ApprovalService {
 
         return newAvl;
     }
+
+    // 결재문서 상세 조회
+    public Approval getDetailApproval(Long avlNo) {
+        Approval avl = avlRepo.findByAvlNo(avlNo);
+        return avl;
+    }
+
+    // 결재문서 상세 파일정보 조회
+    public List<Attachment> getApprovalFiles(Long avlNo) {
+        List<Attachment> avlFiles = atcRepo.findByAtcDocNoAndAtcPrtNo(constant.APPROVAL, avlNo);
+        return avlFiles;
+    }
+
+
 
 }
