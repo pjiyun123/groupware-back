@@ -3,11 +3,16 @@ package com.team4.groupwareproject.controller;
 import com.team4.groupwareproject.domain.Attachment;
 import com.team4.groupwareproject.domain.Businesslog;
 import com.team4.groupwareproject.service.BusinesslogService;
+import com.team4.groupwareproject.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 @RestController
@@ -17,6 +22,7 @@ import java.util.List;
 public class BusinesslogController {
 
     private final BusinesslogService blServ;
+    private final FileUtil fileutil;
 
     // 업무일지 목록 조회
     @GetMapping("/businesslog/list")
