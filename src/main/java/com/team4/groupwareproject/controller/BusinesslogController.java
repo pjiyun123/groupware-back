@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ import java.util.List;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
+//@CrossOrigin(origins = "http://localhost:3030")
 @CrossOrigin(origins = "http://localhost:3030, https://simmpleware.netlify.app/")
 public class BusinesslogController {
 
@@ -65,12 +67,30 @@ public class BusinesslogController {
         return blFiles;
     }
 
+    /*
     // 업무일지 상세 파일 다운로드
     @GetMapping("/businesslog/{blNo}/atc/{atcNo}/download")
     public String download(@PathVariable Long blNo, @PathVariable Long atcNo) {
         String mmpUrl = "https://360map.co.kr/groupware/businesslog/";
         String ftpName = atcRepo.findByAtcNo(atcNo).getAtcFtpName();
         return mmpUrl + ftpName;
+    }
+
+     */
+
+    @GetMapping("/businesslog/{blNo}/atc/{atcNo}/download")
+    public void download(@PathVariable Long blNo, @PathVariable Long atcNo, HttpServletResponse response) throws IOException {
+        String path = "https://360map.co.kr/groupware/businesslog/" + atcRepo.findByAtcNo(atcNo).getAtcFtpName();
+        String name = atcRepo.findByAtcNo(atcNo).getAtcOriName();
+        byte[] fileByte = FileUtils.readFileToByteArray(new File(path));
+
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; fileName=\"" + URLEncoder.encode(name, "UTF-8")+"\";");
+        response.setHeader("Content-Transfer-Encoding", "binary");
+
+        response.getOutputStream().write(fileByte);
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
     }
 
     // 업무일지 수정

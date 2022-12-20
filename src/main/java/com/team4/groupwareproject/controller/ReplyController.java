@@ -12,7 +12,8 @@ import java.util.List;
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3030, https://simmpleware.netlify.app/")
+@CrossOrigin(origins = "http://localhost:3030")
+//@CrossOrigin(origins = "http://localhost:3030, https://simmpleware.netlify.app/")
 public class ReplyController {
 
     private final ReplyService reServ;
