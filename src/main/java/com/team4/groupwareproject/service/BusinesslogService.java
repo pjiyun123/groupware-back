@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +34,7 @@ public class BusinesslogService {
     }
 
     // 업무일지 등록
-    public Businesslog addBusinesslog(Long userNo, Businesslog businesslog, List<MultipartFile> files) throws IOException {
+    public Businesslog addBusinesslog(Long userNo, Businesslog businesslog, List<MultipartFile> files, HttpServletRequest request) throws IOException {
         User user = uRepo.findByUserNo(userNo);
         Businesslog newBl = Businesslog.builder()
                 .userNo(userNo)

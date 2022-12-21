@@ -6,26 +6,30 @@ import com.team4.groupwareproject.repository.AttachmentRepository;
 import com.team4.groupwareproject.service.BusinesslogService;
 import com.team4.groupwareproject.util.FileUtil;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
 @RestController
@@ -48,8 +52,8 @@ public class BusinesslogController {
 
     // 업무일지 등록
     @PostMapping("/businesslog/{userNo}")
-    public Businesslog add(@PathVariable Long userNo, @RequestPart("bl") Businesslog bl, @RequestPart("files") List<MultipartFile> files) throws IOException {
-        Businesslog newBl = blServ.addBusinesslog(userNo, bl, files);
+    public Businesslog add(HttpServletRequest request, @PathVariable Long userNo, @RequestPart("bl") Businesslog bl, @RequestPart("files") List<MultipartFile> files) throws IOException {
+        Businesslog newBl = blServ.addBusinesslog(userNo, bl, files, request);
         return newBl;
     }
 
@@ -80,17 +84,53 @@ public class BusinesslogController {
 
     @GetMapping("/businesslog/{blNo}/atc/{atcNo}/download")
     public void download(@PathVariable Long blNo, @PathVariable Long atcNo, HttpServletResponse response) throws IOException {
-        String path = "https://360map.co.kr/groupware/businesslog/" + atcRepo.findByAtcNo(atcNo).getAtcFtpName();
-        String name = atcRepo.findByAtcNo(atcNo).getAtcOriName();
-        byte[] fileByte = FileUtils.readFileToByteArray(new File(path));
+        FileOutputStream fos = null;
+        InputStream is = null;
 
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; fileName=\"" + URLEncoder.encode(name, "UTF-8")+"\";");
-        response.setHeader("Content-Transfer-Encoding", "binary");
+        try{
+           String oriNm = atcRepo.findByAtcNo(atcNo).getAtcOriName();
+           String ftpNm = atcRepo.findByAtcNo(atcNo).getAtcFtpName();
+           String path = "https://360map.co.kr/groupware/businesslog/";
+           String downPath = "C:\\Users\\박지윤\\Downloads";
+           fos = new FileOutputStream(downPath + "\\" + ftpNm);
+           URL url = new URL(path + ftpNm);
+            URLConnection urlConnection = url.openConnection();
+            //https
+            //HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+            is = urlConnection.getInputStream();
 
-        response.getOutputStream().write(fileByte);
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + oriNm + "\";");
+            response.setHeader("Content-Transfer-Encoding", "binary");
+            response.setHeader("Pragma", "no-cache;");
+            response.setHeader("Expires", "-1;");
+
+            byte[] buffer = new byte[1024];
+            int readBytes;
+            while ((readBytes = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, readBytes);
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // 업무일지 수정
