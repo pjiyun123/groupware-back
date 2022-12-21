@@ -52,8 +52,8 @@ public class BusinesslogController {
 
     // 업무일지 등록
     @PostMapping("/businesslog/{userNo}")
-    public Businesslog add(HttpServletRequest request, @PathVariable Long userNo, @RequestPart("bl") Businesslog bl, @RequestPart("files") List<MultipartFile> files) throws IOException {
-        Businesslog newBl = blServ.addBusinesslog(userNo, bl, files, request);
+    public Businesslog add(@PathVariable Long userNo, @RequestPart("bl") Businesslog bl, @RequestPart("files") List<MultipartFile> files) throws IOException {
+        Businesslog newBl = blServ.addBusinesslog(userNo, bl, files);
         return newBl;
     }
 
@@ -71,7 +71,7 @@ public class BusinesslogController {
         return blFiles;
     }
 
-    /*
+
     // 업무일지 상세 파일 다운로드
     @GetMapping("/businesslog/{blNo}/atc/{atcNo}/download")
     public String download(@PathVariable Long blNo, @PathVariable Long atcNo) {
@@ -80,8 +80,7 @@ public class BusinesslogController {
         return mmpUrl + ftpName;
     }
 
-     */
-
+    /*
     @GetMapping("/businesslog/{blNo}/atc/{atcNo}/download")
     public void download(@PathVariable Long blNo, @PathVariable Long atcNo, HttpServletResponse response) throws IOException {
         FileOutputStream fos = null;
@@ -132,6 +131,7 @@ public class BusinesslogController {
             }
         }
     }
+    */
 
     // 업무일지 수정
     @PatchMapping("/businesslog/{userNo}/{blNo}")
